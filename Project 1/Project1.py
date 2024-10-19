@@ -5,12 +5,13 @@ import seaborn as sb
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import mean_absolute_error #remove
 from sklearn.model_selection import GridSearchCV 
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 import joblib
+from sklearn.preprocessing import StandardScaler
 
 # Step 1: Data Processing
 df = pd.read_csv('Project_1_Data.csv')
@@ -58,6 +59,17 @@ print(coordinates, step)
 
 coord_train, coord_test, step_train, step_test = train_test_split(coordinates, step, test_size=0.2, random_state = 42)
 
+# Scaling
+my_scaler = StandardScaler()
+my_scaler.fit(coord_train)
+scaled_data_train = my_scaler.transform(coord_train)
+scaled_data_train_df = pd.DataFrame(scaled_data_train, columns = coord_train.columns)
+coord_train = scaled_data_train_df
+
+scaled_data_test = my_scaler.transform(coord_test)
+scaled_data_test_df = pd.DataFrame(scaled_data_test, columns = coord_test.columns)
+coord_test = scaled_data_test_df
+
 # Model 1: Random Forrest
 # Training
 RandomForrest = RandomForestClassifier(random_state=4)
@@ -68,10 +80,6 @@ RandomForrest_Pred = RandomForrest.predict(coord_test)
 
 
 # Cross Val,idation
-#RandomForrest_cv_score = cross_val_score(RandomForrest, coord_train, step_train, cv=5, scoring='neg_mean_absolute_error')
-#RF_cv_mae = -RandomForrest_cv_score.mean()
-#print("Model 1 Mean Absolute Error (CV):", round(RF_cv_mae, 2))
-
 param_grid_RF = {
      'n_estimators': [10, 30, 50],
      'max_depth': [None, 10, 20, 30],
@@ -79,7 +87,7 @@ param_grid_RF = {
      'min_samples_leaf': [1, 2, 4],
      'max_features': ['sqrt', 'log2']
  }
-#my_model3 = RandomForestClassifier(random_state=42)
+
 grid_search_RF = GridSearchCV(RandomForrest, param_grid_RF, cv=5, scoring='f1_weighted', n_jobs=1)
 grid_search_RF.fit(coord_train, step_train)
 best_params_RF = grid_search_RF.best_params_
@@ -107,9 +115,8 @@ SVM_pred = SVM.predict(coord_test)
 
 # Cross Val,idation
 param_grid_SVM = {
-     'C': [0.01, 0.1, 1, 10, 100],
+     'C': [0.1, 1, 5],
      'kernel': ['linear', 'poly', 'rbf'],
-     'max_iter': [100, 250, 500, 1000],
      'class_weight': ['Balanced', None]
  }
 
@@ -161,7 +168,26 @@ print("\nClassification Report:\n", LogisticReg_classification_report)
 
 # Model 4: RandomizedCV
 
+
+
 # Part 6: Stacked Model Performance Analysis
+combined_model = [('SVM', best_model_SVM), ('RandomForrest', best_model_RF)]
+
+final_model = LogisticRegression()
+
+StackedModel = StackingClassifier(combined_model, final_model, cv = 5)
+StackedModel.fit(coord_train, step_train)
+SM_pred = StackedModel.predict(coord_test)
+
+StackedModel_accuracy_score = accuracy_score(step_test, SM_pred)
+StackedModel_confusion_matrix = confusion_matrix(step_test, SM_pred)
+StackedModel_classification_report = classification_report(step_test, SM_pred)
+
+print("Stacked Model Performance Analysis\n")
+print("Accuracy Score:", StackedModel_accuracy_score)
+print("\nConfusion Matrix:\n", StackedModel_confusion_matrix)
+print("\nClassification Report:\n", StackedModel_classification_report)
+
     
 # Part 7: Model Evaluation
 joblib.dump(RandomForrest, 'rf_model.joblib')
