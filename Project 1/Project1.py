@@ -42,15 +42,17 @@ Z = df['Z']
 
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
-
 ax.scatter(X, Y, Z)
+plt.title("Step Class Distribution")
 
 # Step 3: Correlation Analysis
 correlation = df.corr()
+print("\nCorrelation Matrix:")
 print(correlation)
 
 plt.figure()
-sb.heatmap(correlation)
+sb.heatmap(correlation, cmap=plt.cm.Oranges, annot=True)
+plt.title("Correlation Matrix")
 
 # Step 4 and 5: Classification Model Development and Performance Analysis
 coordinates = df[['X', 'Y', 'Z']]
@@ -210,11 +212,12 @@ best_pred = model_preds[max_f1]
 best_confusion_matrix = confusion_matrix(step_test, best_pred)
 
 CM = ConfusionMatrixDisplay(best_confusion_matrix)
-CM.plot()
+CM.plot(cmap=plt.cm.Blues)
+plt.title(max_f1.replace('_pred', '') + " Confusion Matrix")
 plt.show()
 
 
-'''Part 6: Stacked Model Performance Analysis'''
+# Part 6: Stacked Model Performance Analysis
 combined_model = [('SVM', best_model_SVM), ('RandomForrest', best_model_RF)]
 
 final_model = LogisticRegression()
@@ -234,7 +237,8 @@ print("\nF1 Score:", StackedModel_f1_score)
 print("\nClassification Report:\n", StackedModel_classification_report)
 
 CM_SM = ConfusionMatrixDisplay(StackedModel_confusion_matrix)
-CM_SM.plot()
+CM_SM.plot(cmap=plt.cm.Greens)
+plt.title("StackingClassifier Confusion Matrix")
 plt.show()
 
     
