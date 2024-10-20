@@ -18,24 +18,6 @@ df = pd.read_csv('Project_1_Data.csv')
 print(df)
 
 # Step 2: Data Visualization
-# Individual Steps
-#for i in range(1, 14):
-    #step = df.loc[df['Step'] == i]
-    #print(step)
-    
-    #X = step.get("X")
-    #Y = step.get("Y")
-    #Z = step.get("Z")
-    
-    #fig = plt.figure()
-    #ax = fig.add_subplot(111, projection='3d')
-    
-    #ax.scatter(X, Y, Z)
-    # Add same axis for each
-    
-    #plt.show()
-
-# Combined Steps
 X = df['X']
 Y = df['Y']
 Z = df['Z'] 
@@ -47,17 +29,13 @@ plt.title("Step Class Distribution")
 
 # Step 3: Correlation Analysis
 correlation = df.corr()
-print("\nCorrelation Matrix:")
-print(correlation)
-
 plt.figure()
-sb.heatmap(correlation, cmap=plt.cm.Oranges, annot=True)
+sb.heatmap(correlation, cmap=sb.cubehelix_palette(as_cmap=True), annot=True)
 plt.title("Correlation Matrix")
 
 # Step 4 and 5: Classification Model Development and Performance Analysis
 coordinates = df[['X', 'Y', 'Z']]
 step = df['Step']
-#print(coordinates, step)
 
 coord_train, coord_test, step_train, step_test = train_test_split(coordinates, step, test_size=0.2, random_state = 42)
 
@@ -74,7 +52,7 @@ coord_test = scaled_data_test_df
 
 # Model 1: Random Forrest
 # Training
-RandomForrest = RandomForestClassifier(random_state=4)
+RandomForrest = RandomForestClassifier(class_weight='balanced', random_state=4)
 RandomForrest.fit(coord_train, step_train)
 RandomForrest_pred = RandomForrest.predict(coord_test)
 
@@ -83,7 +61,7 @@ param_grid_RF = {
      'n_estimators': [10, 30, 50],
      'max_depth': [None, 10, 20, 30],
      'min_samples_split': [2, 5, 10],
-     'min_samples_leaf': [1, 2, 4],
+     'min_samples_leaf': [1, 2, 4, 8],
      'max_features': ['sqrt', 'log2']
  }
 
@@ -105,6 +83,7 @@ print("\nF1 Score:", RF_f1_score)
 print("\nClassification Report:\n", RF_classification_report)
 
 # Model 2: Support Vector Machine (SVM)
+# Training
 SVM = SVC()
 SVM.fit(coord_train, step_train)
 SVM_pred = SVM.predict(coord_test)
@@ -113,7 +92,7 @@ SVM_pred = SVM.predict(coord_test)
 param_grid_SVM = {
      'C': [0.1, 1, 5],
      'kernel': ['linear', 'poly', 'rbf'],
-     'class_weight': ['Balanced', None]
+     'class_weight': [None]
  }
 
 grid_search_SVM = GridSearchCV(SVM, param_grid_SVM, cv=5, scoring='f1_weighted', n_jobs=1)
@@ -134,7 +113,8 @@ print("\nF1 Score:", SVM_f1_score)
 print("\nClassification Report:\n", SVM_classification_report)
 
 # Model 3: Logistic Regression
-LogisticReg = LogisticRegression()
+# Training
+LogisticReg = LogisticRegression(random_state=22)
 LogisticReg.fit(coord_train, step_train)
 LogisticReg_pred = LogisticReg.predict(coord_test)
 
@@ -142,7 +122,7 @@ LogisticReg_pred = LogisticReg.predict(coord_test)
 param_grid_LR = {
      'C': [0.01, 0.1, 1, 10, 100],
      'max_iter': [1000],
-     'class_weight': ['Balanced', None]
+     'class_weight': ['balanced', None]
  }
 
 grid_search_LR = GridSearchCV(LogisticReg, param_grid_LR, cv=5, scoring='f1_weighted', n_jobs=1)
@@ -156,13 +136,14 @@ LogisticReg_accuracy_score = accuracy_score(step_test, LogisticReg_pred)
 LogisticReg_f1_score = f1_score(step_test, LogisticReg_pred, average='weighted')
 LogisticReg_classification_report = classification_report(step_test, LogisticReg_pred)
 
-print("Model 3 Performance Analysis: Logistic Regression\n")
-print("Best Hyperparameters:", best_params_LR)
-print("Accuracy Score:", LogisticReg_accuracy_score)
+print("\nModel 3 Performance Analysis: Logistic Regression")
+print("\nBest Hyperparameters:", best_params_LR)
+print("\nAccuracy Score:", LogisticReg_accuracy_score)
 print("\nF1 Score:", LogisticReg_f1_score)
 print("\nClassification Report:\n", LogisticReg_classification_report)
 
 # Model 4: DT
+# Training
 DecTree = DecisionTreeClassifier(random_state=42)
 DecTree.fit(coord_train, step_train)
 DecTree_pred = DecTree.predict(coord_test)
@@ -205,7 +186,9 @@ model_preds = {
     'LogisticReg_pred': LogisticReg_pred,
     'DecTree_pred': DecTree_pred}
 
-max_f1 = max(f1_scores)
+print(RF_f1_score, SVM_f1_score, LogisticReg_f1_score, DecTree_f1_score, max(f1_scores, key=f1_scores.get))
+
+max_f1 = max(f1_scores, key=f1_scores.get)
 print("\nMax F1 Score:", max_f1, ",", f1_scores[max_f1])
 
 best_pred = model_preds[max_f1]
@@ -220,7 +203,7 @@ plt.show()
 # Part 6: Stacked Model Performance Analysis
 combined_model = [('SVM', best_model_SVM), ('RandomForrest', best_model_RF)]
 
-final_model = LogisticRegression()
+final_model = LogisticRegression(max_iter = 200, class_weight='balanced')
 
 StackedModel = StackingClassifier(combined_model, final_model, cv = 5)
 StackedModel.fit(coord_train, step_train)
@@ -231,7 +214,7 @@ StackedModel_f1_score = f1_score(step_test, SM_pred, average='weighted')
 StackedModel_confusion_matrix = confusion_matrix(step_test, SM_pred)
 StackedModel_classification_report = classification_report(step_test, SM_pred)
 
-print("\nStacked Model Performance Analysis")
+print("\n\nStacked Model Performance Analysis")
 print("\nAccuracy Score:", StackedModel_accuracy_score)
 print("\nF1 Score:", StackedModel_f1_score)
 print("\nClassification Report:\n", StackedModel_classification_report)
@@ -243,19 +226,19 @@ plt.show()
 
     
 # Part 7: Model Evaluation
-joblib.dump(RandomForrest, 'rf_model.joblib')
-loaded_rf_model = joblib.load('rf_model.joblib')
+joblib.dump(best_model_SVM, 'SVM_model.joblib')
+loaded_SVM_model = joblib.load('SVM_model.joblib')
 
-# Coordinates for prediction
-coordinates_to_predict = np.array([[9.375, 3.0625, 1.51],
-                                   [6.995, 5.125, 0.3875],
-                                   [0, 3.0625, 1.93],
-                                   [9.4, 3, 1.8],
-                                   [9.4, 3, 1.3]])
+coord_predict = np.array([[9.375, 3.0625, 1.51],
+                          [6.995, 5.125, 0.3875],
+                          [0, 3.0625, 1.93],
+                          [9.4, 3, 1.8],
+                          [9.4, 3, 1.3]])
 
-# Make predictions using the loaded model for each set of coordinates
-for idx, coord_set in enumerate(coordinates_to_predict):
-    step_prediction = loaded_rf_model.predict(coord_set.reshape(1, -1))
-    print(f"Predicted Step for coordinates {idx + 1}: {step_prediction}")
+prediction_df = pd.DataFrame(coord_predict, columns = coord_train.columns)
+scaled_data = my_scaler.transform(prediction_df)
+scaled_df = pd.DataFrame(scaled_data, columns = coord_train.columns)
+class_pred = loaded_SVM_model.predict(scaled_df)
+print("Predicted Maintenance Steps:", class_pred)
 
 
