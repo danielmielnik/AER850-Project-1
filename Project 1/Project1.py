@@ -19,21 +19,21 @@ print(df)
 
 # Step 2: Data Visualization
 # Individual Steps
-for i in range(1, 14):
-    step = df.loc[df['Step'] == i]
-    print(step)
+#for i in range(1, 14):
+    #step = df.loc[df['Step'] == i]
+    #print(step)
     
-    X = step.get("X")
-    Y = step.get("Y")
-    Z = step.get("Z")
+    #X = step.get("X")
+    #Y = step.get("Y")
+    #Z = step.get("Z")
     
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
     
-    ax.scatter(X, Y, Z)
+    #ax.scatter(X, Y, Z)
     # Add same axis for each
     
-    plt.show()
+    #plt.show()
 
 # Combined Steps
 X = df['X']
@@ -55,7 +55,7 @@ sb.heatmap(correlation)
 # Step 4 and 5: Classification Model Development and Performance Analysis
 coordinates = df[['X', 'Y', 'Z']]
 step = df['Step']
-print(coordinates, step)
+#print(coordinates, step)
 
 coord_train, coord_test, step_train, step_test = train_test_split(coordinates, step, test_size=0.2, random_state = 42)
 
@@ -74,7 +74,7 @@ coord_test = scaled_data_test_df
 # Training
 RandomForrest = RandomForestClassifier(random_state=4)
 RandomForrest.fit(coord_train, step_train)
-RandomForrest_Pred = RandomForrest.predict(coord_test)
+RandomForrest_pred = RandomForrest.predict(coord_test)
 
 # Cross Val,idation
 param_grid_RF = {
@@ -88,22 +88,18 @@ param_grid_RF = {
 grid_search_RF = GridSearchCV(RandomForrest, param_grid_RF, cv=5, scoring='f1_weighted', n_jobs=1)
 grid_search_RF.fit(coord_train, step_train)
 best_params_RF = grid_search_RF.best_params_
-print("Best Hyperparameters:", best_params_RF)
 best_model_RF = grid_search_RF.best_estimator_
-RandomForrest_Pred = best_model_RF.predict(coord_test)
+RandomForrest_pred = best_model_RF.predict(coord_test)
 
 # Performance Anaylysis
-RF_accuracy_score = accuracy_score(step_test, RandomForrest_Pred)
-RF_confusion_matrix = confusion_matrix(step_test, RandomForrest_Pred)
-RF_classification_report = classification_report(step_test, RandomForrest_Pred)
+RF_accuracy_score = accuracy_score(step_test, RandomForrest_pred)
+RF_f1_score = f1_score(step_test, RandomForrest_pred, average='weighted')
+RF_classification_report = classification_report(step_test, RandomForrest_pred)
 
-print("Model 1 Performance Analysis: Random Forrest\n")
-print("Accuracy Score:", RF_accuracy_score)
-CM = ConfusionMatrixDisplay(RF_confusion_matrix)
-CM.plot()
-plt.show()
-
-#print("\nConfusion Matrix:\n", RF_confusion_matrix)
+print("\nModel 1 Performance Analysis: Random Forrest")
+print("\nBest Hyperparameters:", best_params_RF)
+print("\nAccuracy Score:", RF_accuracy_score)
+print("\nF1 Score:", RF_f1_score)
 print("\nClassification Report:\n", RF_classification_report)
 
 # Model 2: Support Vector Machine (SVM)
@@ -121,18 +117,18 @@ param_grid_SVM = {
 grid_search_SVM = GridSearchCV(SVM, param_grid_SVM, cv=5, scoring='f1_weighted', n_jobs=1)
 grid_search_SVM.fit(coord_train, step_train)
 best_params_SVM = grid_search_SVM.best_params_
-print("Best Hyperparameters:", best_params_SVM)
 best_model_SVM = grid_search_SVM.best_estimator_
-SVM_Pred = best_model_SVM.predict(coord_test)
+SVM_pred = best_model_SVM.predict(coord_test)
 
 # Performance Anaylysis
 SVM_accuracy_score = accuracy_score(step_test, SVM_pred)
-SVM_confusion_matrix = confusion_matrix(step_test, SVM_pred)
+SVM_f1_score = f1_score(step_test, SVM_pred, average='weighted')
 SVM_classification_report = classification_report(step_test, SVM_pred)
 
-print("Model 2 Performance Analysis: Support Vector Machine\n")
-print("Accuracy Score:", SVM_accuracy_score, f1_score(step_test, SVM_pred, average='weighted')) # Seperate f1 score
-print("\nConfusion Matrix:\n", SVM_confusion_matrix)
+print("\nModel 2 Performance Analysis: Support Vector Machine")
+print("\nBest Hyperparameters:", best_params_SVM)
+print("\nAccuracy Score:", SVM_accuracy_score) # Seperate f1 score
+print("\nF1 Score:", SVM_f1_score)
 print("\nClassification Report:\n", SVM_classification_report)
 
 # Model 3: Logistic Regression
@@ -150,18 +146,18 @@ param_grid_LR = {
 grid_search_LR = GridSearchCV(LogisticReg, param_grid_LR, cv=5, scoring='f1_weighted', n_jobs=1)
 grid_search_LR.fit(coord_train, step_train)
 best_params_LR = grid_search_LR.best_params_
-print("Best Hyperparameters:", best_params_LR)
 best_model_LR = grid_search_LR.best_estimator_
-LogisticReg_Pred = best_model_LR.predict(coord_test)
+LogisticReg_pred = best_model_LR.predict(coord_test)
 
 # Performance Anaylysis
 LogisticReg_accuracy_score = accuracy_score(step_test, LogisticReg_pred)
-LogisticReg_confusion_matrix = confusion_matrix(step_test, LogisticReg_pred)
+LogisticReg_f1_score = f1_score(step_test, LogisticReg_pred, average='weighted')
 LogisticReg_classification_report = classification_report(step_test, LogisticReg_pred)
 
 print("Model 3 Performance Analysis: Logistic Regression\n")
+print("Best Hyperparameters:", best_params_LR)
 print("Accuracy Score:", LogisticReg_accuracy_score)
-print("\nConfusion Matrix:\n", LogisticReg_confusion_matrix)
+print("\nF1 Score:", LogisticReg_f1_score)
 print("\nClassification Report:\n", LogisticReg_classification_report)
 
 # Model 4: DT
@@ -179,23 +175,46 @@ param_grid_DT = {
 RandomCV = RandomizedSearchCV(DecTree ,param_grid_DT, cv = 5, scoring = 'f1_weighted', n_jobs = 1)
 RandomCV.fit(coord_train, step_train)
 best_params_DT = RandomCV.best_params_
-print("Best Hyperparameters:", best_params_DT)
 best_model_DT = RandomCV.best_estimator_
-RandomForrest_Pred = best_model_DT.predict(coord_test)
+DecTree_pred = best_model_DT.predict(coord_test)
 
 # Performance Anaylysis
 DecTree_accuracy_score = accuracy_score(step_test, DecTree_pred)
-DecTree_confusion_matrix = confusion_matrix(step_test, DecTree_pred)
+DecTree_f1_score = f1_score(step_test, DecTree_pred, average='weighted')
 DecTree_classification_report = classification_report(step_test, DecTree_pred)
 
-print("Model 4 Performance Analysis: Decision Tree - RandomCV\n")
-print("Accuracy Score:", DecTree_accuracy_score)
-print("\nConfusion Matrix:\n", DecTree_confusion_matrix)
+print("\nModel 4 Performance Analysis: Decision Tree - RandomCV")
+print("\nBest Hyperparameters:", best_params_DT)
+print("\nAccuracy Score:", DecTree_accuracy_score)
+print("\nF1 Score:", DecTree_f1_score)
 print("\nClassification Report:\n", DecTree_classification_report)
 
 
+# Part 5: Confusion Matrix
+f1_scores = {
+    'RandomForrest_pred': RF_f1_score,
+    'SVM_pred': SVM_f1_score,
+    'LogisticReg_pred': LogisticReg_f1_score,
+    'DecTree_pred': DecTree_f1_score}
 
-# Part 6: Stacked Model Performance Analysis
+model_preds = {
+    'RandomForrest_pred': RandomForrest_pred,
+    'SVM_pred': SVM_pred,
+    'LogisticReg_pred': LogisticReg_pred,
+    'DecTree_pred': DecTree_pred}
+
+max_f1 = max(f1_scores)
+print("\nMax F1 Score:", max_f1, ",", f1_scores[max_f1])
+
+best_pred = model_preds[max_f1]
+best_confusion_matrix = confusion_matrix(step_test, best_pred)
+
+CM = ConfusionMatrixDisplay(best_confusion_matrix)
+CM.plot()
+plt.show()
+
+
+'''Part 6: Stacked Model Performance Analysis'''
 combined_model = [('SVM', best_model_SVM), ('RandomForrest', best_model_RF)]
 
 final_model = LogisticRegression()
@@ -205,13 +224,18 @@ StackedModel.fit(coord_train, step_train)
 SM_pred = StackedModel.predict(coord_test)
 
 StackedModel_accuracy_score = accuracy_score(step_test, SM_pred)
+StackedModel_f1_score = f1_score(step_test, SM_pred, average='weighted')
 StackedModel_confusion_matrix = confusion_matrix(step_test, SM_pred)
 StackedModel_classification_report = classification_report(step_test, SM_pred)
 
-print("Stacked Model Performance Analysis\n")
-print("Accuracy Score:", StackedModel_accuracy_score)
-print("\nConfusion Matrix:\n", StackedModel_confusion_matrix)
+print("\nStacked Model Performance Analysis")
+print("\nAccuracy Score:", StackedModel_accuracy_score)
+print("\nF1 Score:", StackedModel_f1_score)
 print("\nClassification Report:\n", StackedModel_classification_report)
+
+CM_SM = ConfusionMatrixDisplay(StackedModel_confusion_matrix)
+CM_SM.plot()
+plt.show()
 
     
 # Part 7: Model Evaluation
