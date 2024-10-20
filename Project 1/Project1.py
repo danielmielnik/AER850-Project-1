@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import mean_absolute_error #remove
 from sklearn.model_selection import GridSearchCV 
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 import joblib
 from sklearn.preprocessing import StandardScaler
@@ -166,7 +167,31 @@ print("Accuracy Score:", LogisticReg_accuracy_score)
 print("\nConfusion Matrix:\n", LogisticReg_confusion_matrix)
 print("\nClassification Report:\n", LogisticReg_classification_report)
 
-# Model 4: RandomizedCV
+# Model 4: DT
+DecTree = 
+DecTree.fit(coord_train, step_train)
+DecTree_pred = DecTree.predict(coord_test)
+
+# Randomized Cross Validation
+param_grid_DT = {
+    }
+
+RandomCV = Random(DT ,param_grid_DT, cv = 5, scoring = 'f1_weighted', n_jobs = 1)
+RandomCV.fit(coord_train, step_train)
+best_params_DT = RandomCV.best_params_
+print("Best Hyperparameters:", best_params_DT)
+best_model_DT = RandomCV.best_estimator_
+RandomForrest_Pred = best_model_DT.predict(coord_test)
+
+# Performance Anaylysis
+DecTree_accuracy_score = accuracy_score(step_test, DecTree_pred)
+DecTree_confusion_matrix = confusion_matrix(step_test, DecTree_pred)
+DecTree_classification_report = classification_report(step_test, DecTree_pred)
+
+print("Model 4 Performance Analysis: Decision Tree - RandomCV\n")
+print("Accuracy Score:", DecTree_accuracy_score)
+print("\nConfusion Matrix:\n", DecTree_confusion_matrix)
+print("\nClassification Report:\n", DecTree_classification_report)
 
 
 
