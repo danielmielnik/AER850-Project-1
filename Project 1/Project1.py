@@ -3,16 +3,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 from sklearn.svm import SVC
-from sklearn.metrics import mean_absolute_error #remove
 from sklearn.model_selection import GridSearchCV 
 from sklearn.model_selection import RandomizedSearchCV
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-import joblib
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score, ConfusionMatrixDisplay
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import StandardScaler
+import joblib
 
 # Step 1: Data Processing
 df = pd.read_csv('Project_1_Data.csv')
@@ -76,9 +75,6 @@ coord_test = scaled_data_test_df
 RandomForrest = RandomForestClassifier(random_state=4)
 RandomForrest.fit(coord_train, step_train)
 RandomForrest_Pred = RandomForrest.predict(coord_test)
-#RF_mae_train = mean_absolute_error(RandomForrest_Pred, step_test)
-#print("Model 1 training MAE is: ", round(RF_mae_train,2))
-
 
 # Cross Val,idation
 param_grid_RF = {
@@ -103,7 +99,8 @@ RF_classification_report = classification_report(step_test, RandomForrest_Pred)
 
 print("Model 1 Performance Analysis: Random Forrest\n")
 print("Accuracy Score:", RF_accuracy_score)
-sb.heatmap(RF_confusion_matrix)
+CM = ConfusionMatrixDisplay(RF_confusion_matrix)
+CM.plot()
 plt.show()
 
 #print("\nConfusion Matrix:\n", RF_confusion_matrix)
@@ -134,7 +131,7 @@ SVM_confusion_matrix = confusion_matrix(step_test, SVM_pred)
 SVM_classification_report = classification_report(step_test, SVM_pred)
 
 print("Model 2 Performance Analysis: Support Vector Machine\n")
-print("Accuracy Score:", SVM_accuracy_score)
+print("Accuracy Score:", SVM_accuracy_score, f1_score(step_test, SVM_pred, average='weighted')) # Seperate f1 score
 print("\nConfusion Matrix:\n", SVM_confusion_matrix)
 print("\nClassification Report:\n", SVM_classification_report)
 
@@ -146,7 +143,7 @@ LogisticReg_pred = LogisticReg.predict(coord_test)
 # Cross Val,idation
 param_grid_LR = {
      'C': [0.01, 0.1, 1, 10, 100],
-     'max_iter': [100, 250, 500, 1000],
+     'max_iter': [1000],
      'class_weight': ['Balanced', None]
  }
 
@@ -155,7 +152,7 @@ grid_search_LR.fit(coord_train, step_train)
 best_params_LR = grid_search_LR.best_params_
 print("Best Hyperparameters:", best_params_LR)
 best_model_LR = grid_search_LR.best_estimator_
-RandomForrest_Pred = best_model_LR.predict(coord_test)
+LogisticReg_Pred = best_model_LR.predict(coord_test)
 
 # Performance Anaylysis
 LogisticReg_accuracy_score = accuracy_score(step_test, LogisticReg_pred)
@@ -168,15 +165,18 @@ print("\nConfusion Matrix:\n", LogisticReg_confusion_matrix)
 print("\nClassification Report:\n", LogisticReg_classification_report)
 
 # Model 4: DT
-DecTree = 
+DecTree = DecisionTreeClassifier(random_state=42)
 DecTree.fit(coord_train, step_train)
 DecTree_pred = DecTree.predict(coord_test)
 
 # Randomized Cross Validation
 param_grid_DT = {
-    }
+    'max_depth': [None, 10, 20, 30],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4]
+}
 
-RandomCV = Random(DT ,param_grid_DT, cv = 5, scoring = 'f1_weighted', n_jobs = 1)
+RandomCV = RandomizedSearchCV(DecTree ,param_grid_DT, cv = 5, scoring = 'f1_weighted', n_jobs = 1)
 RandomCV.fit(coord_train, step_train)
 best_params_DT = RandomCV.best_params_
 print("Best Hyperparameters:", best_params_DT)
