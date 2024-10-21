@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 from sklearn.svm import SVC
@@ -34,18 +34,30 @@ ax = fig.add_subplot(projection='3d')
 ax.scatter(X, Y, Z)
 plt.title("Step Class 3D Distribution")
 
+coordinates = df[['X', 'Y', 'Z']]
+step = df['Step']
+
+#coord_train, coord_test, step_train, step_test = train_test_split(coordinates, step, test_size=0.2, random_state = 42)
+
+my_splitter = StratifiedShuffleSplit(n_splits = 1,
+                               test_size = 0.2,
+                               random_state = 42)
+for train_index, test_index in my_splitter.split(df, df["Step"]):
+    strat_df_train = df.loc[train_index].reset_index(drop=True)
+    strat_df_test = df.loc[test_index].reset_index(drop=True)
+    
+coord_train = strat_df_train.drop("Step", axis = 1)
+step_train = strat_df_train["Step"]
+coord_test = strat_df_test.drop("Step", axis = 1)
+step_test = strat_df_test["Step"]
+
 # Step 3: Correlation Analysis
-correlation = df.corr()
+correlation = coord_train.corr()
 plt.figure()
 sb.heatmap(correlation, cmap=sb.cubehelix_palette(as_cmap=True), annot=True)
 plt.title("Correlation Matrix")
 
 # Step 4 and 5: Classification Model Development and Performance Analysis
-coordinates = df[['X', 'Y', 'Z']]
-step = df['Step']
-
-coord_train, coord_test, step_train, step_test = train_test_split(coordinates, step, test_size=0.2, random_state = 42)
-
 # Scaling
 my_scaler = StandardScaler()
 my_scaler.fit(coord_train)
