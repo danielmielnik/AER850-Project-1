@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV 
 from sklearn.model_selection import RandomizedSearchCV
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score, ConfusionMatrixDisplay
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score, precision_score, ConfusionMatrixDisplay
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import StandardScaler
 import joblib
@@ -93,12 +93,14 @@ RandomForrest_pred = best_model_RF.predict(coord_test)
 # Performance Anaylysis
 RF_accuracy_score = accuracy_score(step_test, RandomForrest_pred)
 RF_f1_score = f1_score(step_test, RandomForrest_pred, average='weighted')
+RF_precision_score = precision_score(step_test, RandomForrest_pred, average='weighted')
 RF_classification_report = classification_report(step_test, RandomForrest_pred)
 
 print("\nModel 1 Performance Analysis: Random Forrest")
 print("\nBest Hyperparameters:", best_params_RF)
 print("\nAccuracy Score:", RF_accuracy_score)
-print("\nF1 Score:", RF_f1_score)
+print("\nF1 Score:", RF_precision_score)
+print("\nPrecision Score:", RF_f1_score)
 print("\nClassification Report:\n", RF_classification_report)
 
 # Model 2: Support Vector Machine (SVM)
@@ -123,12 +125,14 @@ SVM_pred = best_model_SVM.predict(coord_test)
 # Performance Anaylysis
 SVM_accuracy_score = accuracy_score(step_test, SVM_pred)
 SVM_f1_score = f1_score(step_test, SVM_pred, average='weighted')
+SVM_precision_score = precision_score(step_test, SVM_pred, average='weighted')
 SVM_classification_report = classification_report(step_test, SVM_pred)
 
 print("\nModel 2 Performance Analysis: Support Vector Machine")
 print("\nBest Hyperparameters:", best_params_SVM)
 print("\nAccuracy Score:", SVM_accuracy_score) # Seperate f1 score
 print("\nF1 Score:", SVM_f1_score)
+print("\nPrecision Score:", SVM_precision_score)
 print("\nClassification Report:\n", SVM_classification_report)
 
 # Model 3: Logistic Regression
@@ -153,12 +157,14 @@ LogisticReg_pred = best_model_LR.predict(coord_test)
 # Performance Anaylysis
 LogisticReg_accuracy_score = accuracy_score(step_test, LogisticReg_pred)
 LogisticReg_f1_score = f1_score(step_test, LogisticReg_pred, average='weighted')
+LogisticReg_precision_score = precision_score(step_test, LogisticReg_pred, average='weighted')
 LogisticReg_classification_report = classification_report(step_test, LogisticReg_pred)
 
 print("\nModel 3 Performance Analysis: Logistic Regression")
 print("\nBest Hyperparameters:", best_params_LR)
 print("\nAccuracy Score:", LogisticReg_accuracy_score)
 print("\nF1 Score:", LogisticReg_f1_score)
+print("\nPrecision Score:", LogisticReg_precision_score)
 print("\nClassification Report:\n", LogisticReg_classification_report)
 
 # Model 4: DT
@@ -183,12 +189,14 @@ DecTree_pred = best_model_DT.predict(coord_test)
 # Performance Anaylysis
 DecTree_accuracy_score = accuracy_score(step_test, DecTree_pred)
 DecTree_f1_score = f1_score(step_test, DecTree_pred, average='weighted')
+DecTree_precision_score = precision_score(step_test, DecTree_pred, average='weighted')
 DecTree_classification_report = classification_report(step_test, DecTree_pred)
 
 print("\nModel 4 Performance Analysis: Decision Tree - RandomCV")
 print("\nBest Hyperparameters:", best_params_DT)
 print("\nAccuracy Score:", DecTree_accuracy_score)
 print("\nF1 Score:", DecTree_f1_score)
+print("\nPrecision Score:", DecTree_precision_score)
 print("\nClassification Report:\n", DecTree_classification_report)
 
 
@@ -228,12 +236,14 @@ SM_pred = StackedModel.predict(coord_test)
 
 StackedModel_accuracy_score = accuracy_score(step_test, SM_pred)
 StackedModel_f1_score = f1_score(step_test, SM_pred, average='weighted')
+StackedModel_precision_score = precision_score(step_test, SM_pred, average='weighted')
 StackedModel_confusion_matrix = confusion_matrix(step_test, SM_pred)
 StackedModel_classification_report = classification_report(step_test, SM_pred)
 
 print("\n\nStacked Model Performance Analysis")
 print("\nAccuracy Score:", StackedModel_accuracy_score)
 print("\nF1 Score:", StackedModel_f1_score)
+print("\nPrecision Score:", StackedModel_precision_score)
 print("\nClassification Report:\n", StackedModel_classification_report)
 
 CM_SM = ConfusionMatrixDisplay(StackedModel_confusion_matrix)
