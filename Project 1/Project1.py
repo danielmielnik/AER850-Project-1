@@ -18,6 +18,13 @@ df = pd.read_csv('Project_1_Data.csv')
 print(df)
 
 # Step 2: Data Visualization
+count_step = df["Step"].value_counts()
+count_step.plot(kind = "bar")
+plt.title("Step Class Distribution")
+plt.xlabel("Step")
+plt.ylabel("No. of Instances")
+plt.show()
+
 X = df['X']
 Y = df['Y']
 Z = df['Z'] 
@@ -25,7 +32,7 @@ Z = df['Z']
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 ax.scatter(X, Y, Z)
-plt.title("Step Class Distribution")
+plt.title("Step Class 3D Distribution")
 
 # Step 3: Correlation Analysis
 correlation = df.corr()
@@ -186,10 +193,8 @@ model_preds = {
     'LogisticReg_pred': LogisticReg_pred,
     'DecTree_pred': DecTree_pred}
 
-print(RF_f1_score, SVM_f1_score, LogisticReg_f1_score, DecTree_f1_score, max(f1_scores, key=f1_scores.get))
-
 max_f1 = max(f1_scores, key=f1_scores.get)
-print("\nMax F1 Score:", max_f1, ",", f1_scores[max_f1])
+print("\n\nMax F1 Score:", max_f1, ",", f1_scores[max_f1])
 
 best_pred = model_preds[max_f1]
 best_confusion_matrix = confusion_matrix(step_test, best_pred)
